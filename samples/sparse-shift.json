@@ -1,0 +1,30 @@
+{
+  "contract_id": "C-18",
+  "shift_id": "S-03",
+  "stations": ["冷站甲", "泵站乙"],
+  "limit_kw": 16,
+  "windows": ["2026-10-06T08:00", "2026-10-06T08:15", "2026-10-06T08:30"],
+  "draft_id": "BD-03",
+  "baseline_id": "BASE-03",
+  "baseline_kwh": [0, 0, 0],
+  "station_inputs": [
+    {"station": "冷站甲", "revision_id": "A0", "tickets": [
+      ["A-t1", "2026-10-06T08:00", 1], ["A-t2", "2026-10-06T08:15", 2],
+      ["A-t3", "2026-10-06T08:30", 3]
+    ]},
+    {"station": "泵站乙", "revision_id": "B0", "tickets": []}
+  ],
+  "corrections": [
+    {"parent": "A0", "revision": "A1", "tickets": {"A-t2": ["2026-10-06T08:15", 7]}},
+    {"parent": "A1", "revision": "A2", "tickets": {
+      "A-t2": ["2026-10-06T08:15", 0], "A-t3": ["2026-10-06T08:30", 4]
+    }},
+    {"parent": "A1", "revision": "A3", "tickets": {"A-t3": ["2026-10-06T08:30", 4]}},
+    {"parent": "A0", "revision": "P", "tickets": {"A-t2": ["2026-10-06T08:15", 7]}},
+    {"parent": "A0", "revision": "A4", "tickets": {"A-t3": ["2026-10-06T08:30", 3]}}
+  ],
+  "comparison_history": [
+    {"parent": "A0", "revision": "A1", "tickets": {"A-t2": ["2026-10-06T08:15", 0]}},
+    {"parent": "A1", "revision": "A2", "tickets": {"A-t3": ["2026-10-06T08:30", 4]}}
+  ]
+}

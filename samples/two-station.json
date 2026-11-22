@@ -1,0 +1,15 @@
+{
+  "contract_id": "C-17",
+  "shift_id": "S-01",
+  "stations": ["冷站甲", "泵站乙"],
+  "limit_kw": 8,
+  "windows": ["2026-10-05T08:00", "2026-10-05T08:15"],
+  "draft_id": "BD-01",
+  "baseline_id": "BASE-01",
+  "baseline_kwh": [1, 0],
+  "station_inputs": [
+    {"station": "冷站甲", "revision_id": "A-01", "tickets": [["A-t1", "2026-10-05T08:00", 1]]},
+    {"station": "泵站乙", "revision_id": "B-01", "tickets": [["B-t1", "2026-10-05T08:15", 2]]}
+  ],
+  "correction": {"parent": "A-01", "revision_id": "A-02", "ticket_id": "A-t1", "window": "2026-10-05T08:00", "kwh": 2}
+}
