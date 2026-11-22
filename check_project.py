@@ -23,7 +23,11 @@ def main():
           f'expected_failures={len(result.expectedFailures)} '
           f'unexpected_successes={len(result.unexpectedSuccesses)} '
           f'result={"PASS" if successful else "FAIL"}')
-    return 0 if successful else 1
+    if not successful:
+        return 1
+    import sparse_fixture
+    sparse_fixture.main()
+    return 0
 
 
 if __name__ == '__main__':

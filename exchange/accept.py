@@ -34,7 +34,7 @@ def accept_packet(store, raw):
         if previous is not None:
             first = get_receipt(store, previous['receipt_id'])
             if first.fingerprint != fingerprint or first.raw != raw:
-                raise ValueError('conflicting fixed packet replay')
+                raise ValueError('conflicting packet replay')
             return first
         receipt = save_receipt(store, packet, raw, fingerprint)
         lock_shift(store, shift.shift_id)

@@ -27,8 +27,11 @@ Python 3.11，使用标准库。`metering` 导出常用接口，直接传入 `St
 | 站票 | `begin_station(store, shift_id, station, revision_id)`、`record_ticket(store, shift_id, station, ticket_id, window, kwh)`，或 `record_tickets(store, shift_id, station, tickets)` 批量提交 `Ticket` |
 | 结班及复领 | `close_station(store, shift_id, station, revision_id)` 返回含 `packet_id` 与 `packet` 的记录。`build_station_packet(store, revision_id)` 按修订复领字节，`read_station_packet(store, packet_id)` 按件号复领 |
 | 站票勘误 | `correct_station(store, parent_revision, new_revision, corrections)`，映射每个待更正票号到原窗及新值 `(window, kwh)` |
-| 实收 | `accept_packet(store, raw_bytes)` 返回实收号、首执、指纹与原件。`get_receipt(store, receipt_id)` 和 `find_receipt(store, packet_id)` 按号复领 |
-| 签报 | `issue_fixed(store, baseline_id, receipt_a, receipt_b)`、`read_report(store, report_id)`、`get_report_receipt(store, report_id)`、`export_report(store, report_id, format='json')`，也可选 `csv` |
+| 稀疏勘误 | `correct_station_sparse(store, parent_revision, new_revision, corrections)`，参数与错误类别同 `correct_station`，只封存本次改窗合计与锚定完整件的分支证据。首份稀疏修订以完整固定件为锚，后续沿用父修订的锚；零值或同值显式更正照收 |
+| 实收 | `accept_packet(store, raw_bytes)` 同时办理整班件与稀疏件，返回实收号、首执、指纹与原件。`get_receipt(store, receipt_id)` 和 `find_receipt(store, packet_id)` 按号复领 |
+| 签报 | `issue_fixed(store, baseline_id, receipt_a, receipt_b)`、`issue_sparse(store, baseline_id, anchor_receipt, target_receipt, other_receipt)`、`read_report(store, report_id)`、`get_report_receipt(store, report_id)`、`export_report(store, report_id, format='json')`，也可选 `csv` |
+
+`issue_sparse` 的三个实收号依次是甲站完整锚件、甲站稀疏目标件与乙站整班件。中心按目标枝上各窗最后一次显式更正取数，未改窗取锚件；缺交的中间件只有在其改窗全部被后件覆盖、且各窗实际供数原件均已实收时才放行，仍需供数的原件缺失或归属不符即抛 `ValueError`，旁枝不能替代。稀疏报告公开 `anchor_receipt_id`、`target_receipt_id`、`other_receipt_id` 与按注册窗序排列的 `window_receipts`（每项为 `(甲站供数实收号, 乙站供数实收号)`）；`issue_fixed` 混入稀疏件时拒签。整班签报、旧报告读回与导出保持不变。
 
 班号在同一库中唯一。具名标识为 1 到 128 个字母、数字、下划线或连字符，首字必须为字母或数字，按原字符串匹配。电量与需量限值接收非负整数，布尔值不作为读数。非法值、缺窗、状态冲突、同号异文、错配或坏件抛出 `ValueError`。合法标识的查询没有记录时抛出 `KeyError`。提交错误保留 SQLite 异常，解除故障后可重新签报。
 
@@ -49,3 +52,5 @@ python3 -B demo.py
 ```
 
 样例在 `samples/two-station.json`。基荷 `[1,0]`、甲站 `[1,0]`、乙站 `[0,2]` 合计 `[2,2]`，峰值 8 kW。甲站勘误后合计 `[3,2]`，峰值 12 kW。演示使用临时数据库。`samples/legacy.sql` 是可装入新建 V1 中心库的历史行快照，含实际原件字节、冻值、首执和旧报。回归覆盖装入后重开、按号复领、实收重投及再次签报。
+
+稀疏更正的样例在 `samples/sparse-shift.json`，交接口径见 `SPARSE-REVIEW.md`。`python3 -B sparse_fixture.py` 用 V1 整班接口核对样例与两组历史的同字节结论；`check_project.py` 在原 16 项回归之外追加稀疏站端封存、实收与签报测试并运行该 V1 核对。`demo.py` 末尾演示漏交中间件仍可签、仍欠供数原件时拒签、补件后复领以及关库重开按号复领签时用量与逐窗出处。

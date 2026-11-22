@@ -72,6 +72,9 @@ def main():
                 raise RuntimeError('corrected sample has the wrong demand')
             print(export_report(center, old.report_id))
             print(export_report(center, new.report_id))
+    from sparse_demo import run_sparse_demo
+    print(json.dumps({'sparse_review': run_sparse_demo()}, ensure_ascii=False, indent=2,
+                     sort_keys=True))
 
 
 if __name__ == '__main__':

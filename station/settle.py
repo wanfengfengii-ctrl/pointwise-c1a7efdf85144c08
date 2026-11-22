@@ -20,6 +20,9 @@ class StationClose:
     tickets: tuple[Ticket, ...]
     packet_id: str
     packet: bytes
+    sparse: bool = False
+    anchor_id: str | None = None
+    changed_windows: tuple[str, ...] = ()
 
 
 def sum_station_usage(windows, tickets):
@@ -40,10 +43,12 @@ def get_station_close(store, revision_id):
     if row is None:
         raise KeyError(revision_id)
     data = json.loads(row['snapshot'])
-    return StationClose(revision_id, row['shift_id'], row['station'], row['parent_id'],
+    return StationClose(row['revision_id'], row['shift_id'], row['station'], row['parent_id'],
                         tuple(data['windows']), tuple(data['usage_kwh']),
                         tuple(Ticket(**item) for item in data['tickets']),
-                        row['packet_id'], row['packet_raw'])
+                        row['packet_id'], row['packet_raw'], bool(data.get('sparse', False)),
+                        data.get('anchor_id'),
+                        tuple(data.get('changed_windows', ())))
 
 
 def save_station_close(store, shift, station, revision_id, parent_id, tickets):
